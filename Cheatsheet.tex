@@ -1,0 +1,499 @@
+\documentclass[rules]{cheatsheet}
+
+\usepackage{hyperref}
+\usepackage{pylistings}
+\usepackage{csquotes}
+
+\lstset{basicstyle=\scriptsize\tt}
+
+\NewDocumentCommand\bashprompt{g}{\texttt{\$}}
+\lstnewenvironment{bash}[1][]{
+  \lstset{
+    language         = Bash,
+    numbers          = left,
+    numbersep        = 4pt,
+    numberstyle      = \bashprompt,
+    framexleftmargin = 3ex,
+    xleftmargin      = 3ex,
+    showstringspaces = false,
+    backgroundcolor = \color{gray},
+  }\lstset{#1}%
+}{}
+
+% Define standard indentation
+\lstset{gobble=2}
+
+\def\HyperFirstAtBeginDocument#1{#1} % Fixes strange hyperref issue
+\begin{document}
+
+\title{Python Cheatsheet}
+
+\section{Version}
+
+\textbf{Use Python 3!} While Python 2 is still widely used, Python 3 is more logical, more consistent, and uses lots of modern concepts like \href{https://docs.python.org/3/howto/unicode.html}{unicode} by default. Also note that Python 2 will \href{https://legacy.python.org/dev/peps/pep-0373/}{\enquote{retire} in 2020}.
+
+\section{\href{https://wiki.python.org/moin/PythonEditors}{Editor}}
+
+Since the editor is your main tool for coding, you should choose it carefully. Some good multiplatform text editors are given below. All of them provide plugins for various applications like \href{https://realpython.com/python-code-quality/#linters}{linters} and can be used as a full-fledged \href{https://realpython.com/python-ides-code-editors-guide/}{Python IDE}:
+\begin{itemize}
+  \item \href{http://www.sublimetext.com/}%
+    {Sublime Text 3}~---~Extremely fast and powerful text editor written in C++ with an infinite trial period.
+  \item \href{https://atom.io/}%
+    {Atom}~---~Reasonably fast and extensible text editor written in JavaScript by GitHub.
+  \item \href{https://code.visualstudio.com/}%
+    {Visual Studio Code}~---~Reasonably fast and feature-rich text editor written in JavaScript by Microsoft.
+\end{itemize}
+
+Since contexts in Python are defined by \href{https://docs.python.org/2.0/ref/indentation.html}{indentation}, leading whitespace is part of Python's syntax! While this makes Python quite readable and forces you to write structured code, your editor should be set to \href{https://www.python.org/dev/peps/pep-0008/#tabs-or-spaces}{replace tabs by spaces} to prevent errors and confusion.
+
+\section{Packages}
+
+Packages can be imported with the \pyinline{import} statement:
+\begin{python}
+  import json
+  import matplotlib.pyplot as plt
+  from numpy import array
+\end{python}
+
+Some useful packages from the \href{https://docs.python.org/3/library/}{Python Standard Library}:
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/library/collections.html}%
+    {\pyinline{collections}}~---~Container datatypes
+  \item \href{https://docs.python.org/3/library/itertools.html}%
+    {\pyinline{itertools}}~---~Functions creating iterators for efficient looping
+  \item \href{https://docs.python.org/3/library/copy.html}%
+    {\pyinline{copy}}~---~Shallow and deep copy operations
+  \item \href{https://docs.python.org/3/library/json.html}%
+    {\pyinline{json}}~---~JSON encoder and decoder
+  \item \href{https://docs.python.org/3/library/pickle.html}%
+    {\pyinline{pickle}}~---~Python object serialization
+  \item \href{https://docs.python.org/3/library/os.path.html}%
+    {\pyinline{os.path}}~---~Common pathname manipulations
+  \item \href{https://docs.python.org/3/library/pdb.html}%
+    {\pyinline{pdb}}~---~The Python Debugger
+\end{itemize}
+
+Third-party packages can be installed locally via the \href{https://pypi.org/project/pip/}{Package Installer for Python (pip)} in a console:
+\begin{bash}
+  pip install --user ...
+\end{bash}
+
+\begin{itemize}
+  \item \href{https://ipython.org/}%
+    {\pyinline{ipython}}~---~Architecture for interactive computing
+  \item \href{https://www.numpy.org/}%
+    {\pyinline{numpy}}~---~Tools for fast numerical computing
+  \item \href{https://www.scipy.org/}%
+    {\pyinline{scipy}}~---~Algorithms for scientific computing
+  \item \href{https://www.sympy.org/}%
+    {\pyinline{sympy}}~---~Symbolic calculation
+  \item \href{https://matplotlib.org/}%
+    {\pyinline{matplotlib}}~---~Versatile plotting library
+\end{itemize}
+
+\section{Basics}
+
+Python is \href{https://docs.python.org/3/glossary.html#term-interpreted}{interpreted}. In contrast to compiled software, this makes Python code less performant but allows for using and testing Python code \href{https://docs.python.org/3/glossary.html#term-interactive}{interactively} via interpreter sessions (\href{https://ipython.org/}{\pyinline{ipython}} provides an improved interactive shell):
+\begin{bash}
+  python
+  ipython
+\end{bash}
+
+The Python interpreter stores the last expression value into the \href{https://dbader.org/blog/meaning-of-underscores-in-python#single-underscore}{special variable \enquote{{\pyinline{_}}}}. In Python scripts \enquote{{\pyinline{_}}} can be used as an ordinary variable name (usually for temporary or insignificant values):
+\begin{python}
+  def func():
+    return "important", "temporary", "insignificant"
+  a, _, _ = func()
+  a # "important"
+\end{python}
+
+Everything in Python is an \href{https://docs.python.org/3/reference/datamodel.html#objects-values-and-types}{object}, including functions and classes. They can be stored in variables, lists and dictionaries, which are objects themselves:
+\begin{python}
+  def add(a, b):
+    return a + b
+  lst = [42, "Hello World!", add]
+  lst[2](2, 3) # 5
+\end{python}
+
+\section{\href{https://docs.python.org/3/library/datatypes.html}{Data types}}
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/library/stdtypes.html#typesmapping}{Dictionaries} are the central, highly optimized data structure in Python that maps arbitrary elements to keys, which can be of any \href{https://docs.python.org/3/glossary.html#term-hashable}{hashable} (immutable) type. Basically dictionaries are similar to phone books:
+  \begin{python}[gobble=4]
+    phonebook = {
+      "Alice": 3141,
+      "Bob": 2718,
+    }
+    phonebook["Alice"] # 3141
+    phonebook.keys() # dict_keys(['Alice', 'Bob'])
+  \end{python}
+  Since dictionaries are in general unordered, you may wish to use \href{https://docs.python.org/3.7/library/collections.html#collections.OrderedDict}{\pyinline{collections.OrderedDict}} in some cases:
+  \begin{python}[gobble=4]
+    from collections import OrderedDict
+    d = OrderedDict(one=1, two=2)
+    d # OrderedDict([('one', 1), ('two', 2)])
+    d["two"] # 2
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/stdtypes.html#list}{Lists} are dynamic, ordered data structures which can hold arbitrary elements:
+  \begin{python}[gobble=4]
+    lst = [1, "two"]
+    lst[0] = "one" # ["one", "two"]
+    del lst[1] # ["one"]
+    lst.append({"three": 3}) # ["one", {"three": 3}]
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/stdtypes.html#tuple}{Tuples} are similar to lists but are immutable:
+  \begin{python}[gobble=4]
+    tpl = (1, "two")
+    tpl[0] = "one" # TypeError
+    del tpl[1] # TypeError
+    tpl.append(3) # AttributeError
+    list(tpl) # [1, 'two']
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/collections.html#collections.namedtuple}{\pyinline{collections.namedtuple}} provides tuples, which can be accessed by attributes:
+  \begin{python}[gobble=4]
+    from collections import namedtuple
+    Car = namedtuple("Car", "color mileage")
+    my_car = Car("red", 3.14)
+    my_car.color # "red"
+    my_car # Car(color="red" , mileage=3.14)
+  \end{python}
+
+  \columnbreak % ===================== Manual column break =====================
+
+  \item \href{https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html}{\pyinline{numpy.ndarray}} is a fast array implementation for numerical calculations provided by the third-party package \pyinline{numpy}:
+  \begin{python}[gobble=4]
+    import numpy as np
+    arr = np.array([3.141, 2.718])
+    arr # array([3.141, 2.718])
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/stdtypes.html#set}{Sets} are immutable, unordered collections of unique, \href{https://docs.python.org/3/glossary.html#term-hashable}{hashable} objects:
+  \begin{python}[gobble=4]
+    s = set([1, 2, 2, 3])
+    s # {1, 2, 3}
+    len(s) # 3
+    s[0] # TypeError
+  \end{python}
+\end{itemize}
+
+\subsection{Quick reference}
+
+\vspace*{-\baselineskip}
+\begin{tabular}{lcrrl}
+  &&&& access by: \\
+  \href{https://docs.python.org/3/library/stdtypes.html#dict}{\pyinline{dict}}
+    & \{\} & mutable & unordered & key \\
+  \href{https://docs.python.org/3.7/library/collections.html#collections.OrderedDict}{\pyinline{OrderedDict}}
+    && mutable & ordered & key \\
+  \href{https://docs.python.org/3/library/stdtypes.html#list}{\pyinline{list}}
+    & [] & mutable & ordered & index \\
+  \href{https://docs.python.org/3/library/stdtypes.html#tuple}{\pyinline{tuple}}
+    & () & immutable & ordered & index \\
+  \href{https://docs.python.org/3/library/collections.html#collections.namedtuple}{\pyinline{namedtuple}}
+    && immutable & ordered & attribute \\
+  \href{https://docs.python.org/3/library/stdtypes.html#set}{\pyinline{set}}
+    && immutable & unordered &
+\end{tabular}
+
+\section{In- and output}
+
+Python's \pyinline{open} and \pyinline{save} statements can be used for basic reading and writing of files. It is recommended to use them in combination with the \href{https://docs.python.org/3/reference/compound_stmts.html#with}{\pyinline{with}} statement for context management:
+\begin{python}
+  with open("file.txt", "w") as f:
+    f.write("Hello World!")
+  # f.close() called on leaving the context
+\end{python}
+
+The \href{https://docs.python.org/3/library/json.html}{\pyinline{json}} module allows for easy saving and loading of human- readable \href{https://www.json.org/}{JSON} files, which closely resemble Python's dictionary and list syntax:
+\begin{python}
+  import json
+  dct = {"one": 1, "list": [2, 3]}
+  with open("dct.json", "w") as f:
+    json.dump(dct, f)
+  with open("dct.json") as f:
+    dct_ = json.load(f)
+  dct_ # {'one': 1, 'list': [2, 3]}
+\end{python}
+
+Python's \href{https://docs.python.org/3/library/pickle.html}{\pyinline{pickle}} module allows for saving and loading \href{https://docs.python.org/3/library/pickle.html#pickle-picklable}{whole objects} into \href{https://docs.python.org/3/library/stdtypes.html#bytes}{byte strings}, which can be easily stored in files:
+\begin{python}
+  import pickle
+  class Obj:
+    attr = "A class attribute"
+  pickle.dumps(Obj) # b'\x80\x03c__main__\nObj\nq\x00.'
+\end{python}
+
+\section{\href{https://docs.python.org/3/tutorial/errors.html}{Error handling}}
+
+Any errors within a \href{https://docs.python.org/3/reference/compound_stmts.html#try}{\pyinline{try}} block can be catched by an \href{https://docs.python.org/3/reference/compound_stmts.html#except}{\pyinline{except}} statement. It is however wise to except only specific \href{https://docs.python.org/3/library/exceptions.html#bltin-exceptions}{error types}:
+\begin{python}
+  try:
+    raise Exception("A wild Error occurred!")
+  except Exception as e:
+    print("Exception:", e) # Exception: A wild ...
+  except:
+    print("Any Error occurred!")
+\end{python}
+
+\section{\href{https://realpython.com/python-debugging-pdb/}{Debugging}}
+
+Python's \href{https://docs.python.org/3/reference/simple_stmts.html?highlight=assert#the-assert-statement}{\pyinline{assert} statement} provides a basic debugging tool to test conditions:
+\begin{python}
+  def apply_discount(price, discount):
+    new_price = price*(1 - discount)
+    assert 0 <= new_price <= price
+    return new_price
+  apply_discount(7.99, 0.2) # 6.392
+  apply_discount(7.99, 1.2) # AssertionError
+\end{python}
+
+The class \href{https://docs.python.org/3/library/pdb.html}{\pyinline{pdb}} provides more sophisticated debugging abilities. It can be used to execute a script in debugging mode:
+\begin{bash}
+  python -m pdb ...
+\end{bash}
+The interactive debugger shell can evaluate python expressions like \pyinline{print()}, which can be used to inspect variables. Some useful \href{https://docs.python.org/3/library/pdb.html#debugger-commands}{debugger commands} are:
+\begin{tabular}{ll}
+  \href{https://docs.python.org/3/library/pdb.html#pdbcommand-next}{\pyinline{n}} & Execute the current line \\
+  \href{https://docs.python.org/3/library/pdb.html#pdbcommand-break}{\pyinline{b}} & Sets a breakpoint in the current line \\
+  \href{https://docs.python.org/3/library/pdb.html#pdbcommand-continue}{\pyinline{c}} & Continue to the next breakpoint \\
+  \href{https://docs.python.org/3/library/pdb.html#pdbcommand-quit}{\pyinline{q}} & Quit the debugger shell \\
+  \href{https://docs.python.org/3/library/pdb.html#pdbcommand-help}{\pyinline{h}} & Print a list of available commands \\
+\end{tabular}
+
+One can also set breakpoints manually in the Python script:
+\begin{python}
+  import pdb; pdb.set_trace()
+\end{python}
+
+\section{Tricks}
+
+In the following you find a selection of tricks, tips and secrets inspired by the \href{https://realpython.com/python-tricks/}{Python Tricks} series.
+
+\subsection{Dictionaries}
+
+\begin{itemize}
+  \item Merging (\href{https://docs.python.org/3/whatsnew/3.5.html}{Python 3.5+}):
+  \begin{python}[gobble=4]
+    x = {"a": 1, "b": 2}
+    y = {"c": 3}
+    z = {**x, **y} # {"a": 1, "b": 2, "c": 3}
+  \end{python}
+
+  \item \href{https://docs.python.org/3/howto/sorting.html}{Sorting}:
+  \begin{python}[gobble=4]
+    dic = {"a": 3, "b": 1, "c": 2}
+    sort = sorted(dic.items(), key=lambda x: x[1])
+    sort # [("b", 1), ("c", 2), ("a", 3)]
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/stdtypes.html#dict.get}{\pyinline{get()}} method:
+  \begin{python}[gobble=4]
+    users = {42: "Alice", 1337: "Bob"}
+    def greeting(userid):
+      return("Hi {}!"
+             .format(users.get(userid, "there")))
+    greeting(42) # "Hi Alice!"
+    greeting(1998) # "Hi there!"
+  \end{python}
+\end{itemize}
+
+\subsection{Lists}
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/library/stdtypes.html#list}{List comprehension}:
+  \begin{python}[gobble=4]
+    even_squares = [x**2 for x in range(10)
+                    if not x % 2]
+    even_squares # [0, 4, 16, 36, 64]
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/stdtypes.html#sequence-types-list-tuple-range}{List slicing}:
+  \begin{python}[gobble=4]
+    lst = list(range(1, 7))
+    lst # [1, 2, 3, 4, 5, 6]
+    lst[1:-2] # [2, 3, 4]
+    lst[1:-2:2] # [2, 4]
+    lst[::-1] # [6, 5, 4, 3, 2, 1]
+  \end{python}
+\end{itemize}
+
+\subsection{Variables}
+
+\begin{itemize}
+  \item In-place value swapping:
+  \begin{python}[gobble=4]
+    a = 42
+    b = 1337
+    a, b = b, a
+    a, b # (1337, 42)
+  \end{python}
+\end{itemize}
+
+\subsection{Objects}
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/reference/datamodel.html#object.__repr__}{\pyinline{__repr__}} and \href{https://docs.python.org/3/reference/datamodel.html#object.__str__}{\pyinline{__str__}} dunder methods:
+  \begin{python}[gobble=4]
+    import datetime
+    today = datetime.date.today()
+    today # datetime.date(2019, 4, 17)
+    str(today) # '2019-04-17'
+    repr(today) # 'datetime.date(2019, 4, 17)'
+  \end{python}
+
+  \item \href{https://docs.python.org/3/library/stdtypes.html#object.__dict__}{\pyinline{__dict__}} contains an attributes like variables and functions:
+  \begin{python}[gobble=4]
+    class Obj:
+      def method(self): print(self)
+    obj = Obj()
+    obj.__class__ # __main__.Obj
+    obj.__class__.__dict__
+  \end{python}\vspace{-\baselineskip}
+  \begin{pyresult}[gobble=4]
+    mappingproxy({'__module__': '__main__',
+                  'method': <function ...>,
+                  '__dict__': <attribute ...>,
+                  '__weakref__': <attribute ...>,
+                  '__doc__': None})
+  \end{pyresult}
+\end{itemize}
+
+\subsection{Functions}
+
+\begin{itemize}
+  \item Lambda functions:
+  \begin{python}[gobble=4]
+    add = lambda x, y: x + y
+    add(5, 3) # 8
+    (lambda x, y: x + y)(5, 3) # 8
+  \end{python}
+
+  \item Function argument unpacking:
+  \begin{python}[gobble=4]
+    def func(x, y, z):
+      print(x, y, z)
+    tup = (1, 0, 1)
+    dic = {"x": 1, "z": 1, "y": 0}
+    func(*tup) # 1, 0, 1
+    func(**dic) # 1, 0, 1
+  \end{python}
+
+  \item Keyword-only function arguments:
+  \begin{python}[gobble=4]
+    def func(a, b, *, c=None):
+      return "Hello!"
+    func(1, 2, 3) # TypeError
+    func(1, 2, c=3) # 'Hello!'
+  \end{python}
+\end{itemize}
+
+\subsection{Formatting}
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/library/string.html#formatstrings}{Format String Syntax}:
+  \begin{python}[gobble=4]
+    "{:.2f} Euro".format(3.141) # '3.14 Euro'
+    "{c.imag:.0f}i".format(c=(1+2j)) # '2i'
+    "{1} -> {0}".format("a", "b") # 'b -> a'
+  \end{python}
+
+  \item \href{https://docs.python.org/3/reference/lexical_analysis.html#f-strings}{Formatted string literals} (\href{https://docs.python.org/3/whatsnew/3.6.html}{Python 3.6+}):
+  \begin{python}[gobble=4]
+    answer = 42
+    str = f"The answer is {answer}"
+    str # 'The answer is 42'
+  \end{python}
+
+  \item Formatted strings from dictionaries with \href{https://docs.python.org/3/library/json.html}{\pyinline{json.dumps}}:
+  \begin{python}[gobble=4]
+    import json
+    dct = {"b": 1, "a": 2}
+    print(json.dumps(dct, indent=2, sort_keys=True))
+  \end{python}\vspace{-\baselineskip}
+  \begin{pyresult}[gobble=4]
+    {
+      "a": 2,
+      "b": 1
+    }
+  \end{pyresult}
+\end{itemize}
+
+\subsection{\href{https://realpython.com/copying-python-objects/}{Copying}}
+
+\begin{itemize}
+  \item References, \href{https://docs.python.org/3/library/copy.html}{shallow and deep copies}:
+  \begin{python}[gobble=4]
+    from copy import deepcopy
+    lst = [1, [2, 3]]
+    reference = lst
+    shallow_copy = lst[:]
+    deep_copy = deepcopy(lst)
+    lst[0] = "a"
+    lst[1][1] = 4
+    reference # ['a', [2, 4]]
+    shallow_copy # [1, [2, 4]]
+    deep_copy # [1, [2, 3]]
+  \end{python}
+\end{itemize}
+
+\subsection{Boolean expressions}
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/library/stdtypes.html#comparisons}{Comparisons} (\pyinline{is} vs \pyinline{==}):
+  \begin{python}[gobble=4]
+    obj = [1, 2, 3]
+    ref = obj
+    obj is ref, obj == ref # (True, True)
+    copy = obj[:]
+    obj is copy, obj == copy # (False, True)
+  \end{python}
+
+  \item Test multiple flags with \href{https://docs.python.org/3/library/functions.html#any}{\pyinline{any()}} and \href{https://docs.python.org/3/library/functions.html#all}{\pyinline{all()}}:
+  \begin{python}[gobble=4]
+    votes = [True, False, False]
+    any(votes) # True
+    all(votes) # False
+  \end{python}
+\end{itemize}
+
+\subsection{Tools}
+
+\begin{itemize}
+  \item Better tracebacks with \href{https://docs.python.org/3/library/faulthandler.html}{\pyinline{faulthandler}} (\href{https://docs.python.org/3/whatsnew/3.3.html}{Python 3.3+}):
+  \begin{python}[gobble=4]
+    import faulthandler
+    faulthandler.enable()
+  \end{python}
+
+  \item Measure execution times with \href{https://docs.python.org/3/library/timeit.html#timeit.timeit}{\pyinline{timeit}}:
+  \begin{python}[gobble=4]
+    from timeit import timeit
+    cmd = "'-'.join(str(n) for n in range(100))"
+    time = timeit(cmd, number=100)
+    time # 0.0020432909950613976
+  \end{python}
+
+  \item Find the most common elements with \href{https://docs.python.org/3/library/collections.html#collections.Counter}{\pyinline{Counter}}:
+  \begin{python}[gobble=4]
+    from collections import Counter
+    counter = Counter("Hello World!")
+    counter.most_common(2) # [('l', 3), ('o', 2)]
+  \end{python}
+\end{itemize}
+
+\section{References}
+
+\begin{itemize}
+  \item \href{https://docs.python.org/3/index.html}%
+    {Python documentation}~---~The Python documentation with lots of examples
+  \item \href{https://www.python.org/dev/peps/pep-0008/}%
+    {PEP 8}~---~Style guide for Python code
+  \item \href{https://realpython.com/}%
+    {Real Python}~---~Guides, tutorials and news about Python
+\end{itemize}
+
+\end{document}

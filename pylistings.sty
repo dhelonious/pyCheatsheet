@@ -1,0 +1,89 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pylistings}[2019/04/15 Code listings for Python]
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+\RequirePackage{xkeyval}
+\RequirePackage{xparse}
+\RequirePackage{xspace}
+\RequirePackage{calc}
+
+% Options
+\define@key{pylst}{tabsize}{\def\pylst@tabsize{#1}}
+\setkeys{pylst}{tabsize = 2}
+
+\DeclareOptionX*{\PackageWarning{pylistings}{Unknown option `\CurrentOption'}}
+\ProcessOptionsX<pylst>
+
+% Colors
+\definecolor{pyorange}{HTML}{FB6620}
+\definecolor{pyblue}{HTML}{1586D2}
+\definecolor{pygreen}{HTML}{22A21F}
+\definecolor{pypink}{HTML}{FC1785}
+\definecolor{pygray}{HTML}{AAAAAA}
+\definecolor{gray}{HTML}{F2F2F2}
+
+% Python listings
+
+\lstset{basicstyle=\tt}
+
+\NewDocumentCommand\pyprompt{g}{\texttt{\color{pygreen}{>}{>}{>}}}
+\newlength\pypromptwidth
+\settowidth\pypromptwidth{\pyprompt}
+\NewDocumentCommand\pycolorscheme{}{% Summerfruit
+  \lstset{
+    keywordstyle    = {[1]\color{pyorange}},
+    keywordstyle    = {[2]\color{pygray}},
+    keywordstyle    = {[3]\color{pyblue}},
+    emphstyle       = \color{pypink},
+    stringstyle     = \color{pyblue},
+    commentstyle    = \color{pygreen},
+    deletekeywords  = {def},
+    emph            = {def, self},
+    morekeywords    = {[2]{__init__,__str__,__repr__}},
+    morekeywords    = {[3]{True,False,None}},
+    literate=*
+      {+}{{{\color{pyorange}+}}}{1}
+      {-}{{{\color{pyorange}-}}}{1}
+      {*}{{{\color{pyorange}*}}}{1}
+      {/}{{{\color{pyorange}/}}}{1}
+      {\%}{{{\color{pyorange}\%}}}{1}
+      {=}{{{\color{pyorange}=}}}{1}
+      {==}{{{\color{pyorange}==}}}{2}
+      {!=}{{{\color{pyorange}!=}}}{2}
+  }%
+}
+
+\NewDocumentCommand\pythonstyle{}{%
+  \lstset{
+    language         = Python,
+    backgroundcolor  = \color{gray},
+    numbers          = left,
+    numbersep        = 4pt,
+    numberstyle      = \pyprompt,
+    framexleftmargin = \dimexpr\the\pypromptwidth + 2pt\relax,
+    xleftmargin      = \dimexpr\the\pypromptwidth + 2pt\relax,
+    showstringspaces = false,
+    escapeinside     = {&}{&}, % To add LaTeX code into listings use &...&
+    mathescape       = true,   % To add LaTeX math into listings use $...$
+  }%
+  \begingroup\edef\apply{%
+    \endgroup\noexpand\lstset{
+      tabsize = \pylst@tabsize,
+    }%
+  }\apply%
+}
+
+\lstnewenvironment{python}[1][]%
+  {\pythonstyle\pycolorscheme\lstset{#1}}{}
+
+\NewDocumentCommand\pyresultprompt{g}{}
+\lstnewenvironment{pyresult}[1][]%
+  {\pythonstyle\lstset{
+    numberstyle      = \pyresultprompt,
+    framexleftmargin = 2pt,
+    xleftmargin      = 2pt,
+  }\lstset{#1}}{}
+
+\NewDocumentCommand\pyinline{mo}%
+  {{\pythonstyle\IfValueT{#2}{\lstset{#2}}\lstinline!#1!}\xspace}
